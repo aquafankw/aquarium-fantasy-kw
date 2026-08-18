@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "96500000000"; // Replace with the shop's real number before publishing.
+const WHATSAPP_NUMBER = "96566221776"; // Replace with the shop's real number before publishing.
 const state = { products: [], filtered: [], cart: JSON.parse(localStorage.getItem("aquafan-cart") || "{}"), lang: "ar" };
 const $ = (selector) => document.querySelector(selector);
 const money = (value) => `${Number(value).toFixed(3)} ${state.lang === "ar" ? "د.ك" : "KWD"}`;
