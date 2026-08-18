@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Aquafan Kuwait — أحواض وأسماك ونباتات ومستلزمات الأكواريوم في الكويت">
+  <meta name="theme-color" content="#063b55">
+  <title>Aquafan Kuwait | Aquarium Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav shell">
+      <a class="brand" href="#top" aria-label="Aquafan Kuwait home">
+        <img src="assets/aquafan.jpg" alt="Aquafan Kuwait">
+        <span><b>Aquafan</b><small>Kuwait</small></span>
+      </a>
+      <nav aria-label="التنقل الرئيسي">
+        <a href="#products" data-ar="المنتجات" data-en="Products">المنتجات</a>
+        <a href="#benefits" data-ar="لماذا نحن؟" data-en="Why us?">لماذا نحن؟</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="ghost" id="language" type="button" aria-label="Change language">English</button>
+        <button class="cart-button" id="openCart" type="button" aria-label="فتح السلة">
+          <span aria-hidden="true">🛒</span><span data-ar="السلة" data-en="Cart">السلة</span><b id="cartCount">0</b>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-bubbles" aria-hidden="true"></div>
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow" data-ar="عالمك المائي يبدأ هنا" data-en="Your aquatic world starts here">عالمك المائي يبدأ هنا</span>
+          <h1 data-ar="حوّل مساحتك إلى عالمٍ ينبض بالحياة" data-en="Turn your space into a world full of life">حوّل مساحتك إلى عالمٍ ينبض بالحياة</h1>
+          <p data-ar="أحواض، فلاتر، نباتات وزينة مختارة بعناية — كل ما تحتاجه لبناء أكواريوم جميل وصحي في الكويت." data-en="Aquariums, filters, plants and décor, carefully selected for a beautiful, healthy aquarium in Kuwait.">أحواض، فلاتر، نباتات وزينة مختارة بعناية — كل ما تحتاجه لبناء أكواريوم جميل وصحي في الكويت.</p>
+          <div class="hero-actions">
+            <a class="primary" href="#products" data-ar="تسوّق الآن" data-en="Shop now">تسوّق الآن</a>
+            <a class="secondary" id="heroWhatsApp" href="#" target="_blank" rel="noopener" data-ar="استشرنا على واتساب" data-en="Ask us on WhatsApp">استشرنا على واتساب</a>
+          </div>
+          <div class="trust-row">
+            <span>✓ <i data-ar="منتجات مختارة" data-en="Curated products">منتجات مختارة</i></span>
+            <span>✓ <i data-ar="توصيل داخل الكويت" data-en="Delivery across Kuwait">توصيل داخل الكويت</i></span>
+          </div>
+        </div>
+        <div class="hero-visual" aria-label="Aquafan Kuwait">
+          <div class="aqua-orbit"><img src="assets/aquafan.jpg" alt="Aquarium Fantasy logo"></div>
+          <span class="fish fish-one">🐠</span><span class="fish fish-two">🐟</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="benefits shell" id="benefits">
+      <article><span>🐚</span><div><b data-ar="اختيارات تناسب الجميع" data-en="Something for everyone">اختيارات تناسب الجميع</b><small data-ar="من أول حوض إلى تجهيزات المحترفين" data-en="From first tanks to expert setups">من أول حوض إلى تجهيزات المحترفين</small></div></article>
+      <article><span>💬</span><div><b data-ar="مساعدة قبل الشراء" data-en="Help before you buy">مساعدة قبل الشراء</b><small data-ar="اسألنا لاختيار المنتج المناسب" data-en="Ask us to find the right product">اسألنا لاختيار المنتج المناسب</small></div></article>
+      <article><span>🇰🇼</span><div><b data-ar="متجر كويتي" data-en="Kuwaiti store">متجر كويتي</b><small data-ar="خدمة محلية أقرب إليك" data-en="Friendly service close to you">خدمة محلية أقرب إليك</small></div></article>
+    </section>
+
+    <section class="catalog shell" id="products">
+      <div class="section-heading">
+        <div><span class="eyebrow" data-ar="اكتشف مجموعتنا" data-en="Explore our collection">اكتشف مجموعتنا</span><h2 data-ar="اختَر ما يناسب عالمك المائي" data-en="Choose what fits your aquatic world">اختَر ما يناسب عالمك المائي</h2></div>
+        <p id="productCount"></p>
+      </div>
+      <div class="filters">
+        <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" data-placeholder-ar="ابحث باسم المنتج أو رقمه…" data-placeholder-en="Search by product name or number…" placeholder="ابحث باسم المنتج أو رقمه…"></label>
+        <select id="category" aria-label="التصنيف"><option value="all">كل التصنيفات</option></select>
+        <select id="sort" aria-label="ترتيب المنتجات"><option value="featured">الموصى بها</option><option value="low">السعر: الأقل أولاً</option><option value="high">السعر: الأعلى أولاً</option></select>
+      </div>
+      <div class="product-grid" id="productGrid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer><div class="shell footer-inner"><div class="brand footer-brand"><img src="assets/aquafan.jpg" alt=""><span><b>Aquafan</b><small>Kuwait</small></span></div><p data-ar="نصنع معكم عالماً مائياً أجمل." data-en="Creating a more beautiful aquatic world with you.">نصنع معكم عالماً مائياً أجمل.</p><small>© <span id="year"></span> Aquafan Kuwait</small></div></footer>
+
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="cart-panel" id="cartPanel" aria-hidden="true" aria-label="سلة التسوق">
+    <div class="cart-head"><div><span class="eyebrow" data-ar="طلبك" data-en="Your order">طلبك</span><h2 data-ar="سلة التسوق" data-en="Shopping cart">سلة التسوق</h2></div><button id="closeCart" class="icon-button" type="button" aria-label="إغلاق">×</button></div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer"><div class="total"><span data-ar="الإجمالي" data-en="Total">الإجمالي</span><b id="cartTotal">0.000 د.ك</b></div><button class="checkout" id="checkout" type="button" data-ar="إرسال الطلب عبر واتساب" data-en="Send order on WhatsApp">إرسال الطلب عبر واتساب</button><small data-ar="الدفع الإلكتروني والتوصيل سيُربطان في المرحلة التالية." data-en="Online payment and delivery will be connected in the next phase.">الدفع الإلكتروني والتوصيل سيُربطان في المرحلة التالية.</small></div>
+  </aside>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
