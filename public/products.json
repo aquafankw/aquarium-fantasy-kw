@@ -96,22 +96,6 @@
 ]
   },
   {
-    "id": 585,
-    "nameEn": "Round - XL - (D35XH25)",
-    "nameAr": "دائري - كبيرجدا - (D35XH25)",
-    "descriptionEn": "",
-    "descriptionAr": "",
-    "category": "Packages",
-    "subCategory": "",
-    "price": 35.0,
-    "stock": 100,
-    "image": "assets/products/585.jpg",
-"images": [
-  "assets/products/585-2.jpg",
-  "assets/products/585-3.jpg"
-]
-  },
-  {
     "id": 582,
     "nameEn": "Round - L - (D30XH22))",
     "nameAr": "دائري - كبير (D30XH22))",
