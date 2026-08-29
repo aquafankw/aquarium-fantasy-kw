@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aquarium-fantasy-kw",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-28",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "aquafan-products",
+      "database_id": "a4fcdb3f-6997-40de-85a7-3cb204f4d6d6"
+    }
+  ]
+}

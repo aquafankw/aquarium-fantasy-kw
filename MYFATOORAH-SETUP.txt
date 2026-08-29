@@ -1,0 +1,37 @@
+AQUAFAN — MYFATOORAH SETUP
+
+1) Cloudflare D1
+- Use the existing database named: aquafan-products
+- Database ID is already configured in wrangler.jsonc.
+- The orders table migration runs automatically with npm run deploy.
+
+2) Cloudflare build/deploy settings
+- Build command: npm install
+- Deploy command: npm run deploy
+
+3) Worker variables and secrets
+- Secret: MYFATOORAH_API_KEY
+- Variable: MYFATOORAH_BASE_URL = https://apitest.myfatoorah.com
+- Secret (before enabling webhook): MYFATOORAH_WEBHOOK_SECRET
+
+4) Test first
+- Keep MYFATOORAH_BASE_URL on https://apitest.myfatoorah.com
+- Use a MyFatoorah Test API Key, not the Live key.
+- Add a low-price product, enter customer details, and press Pay Now.
+- Confirm success returns to /payment-success and the D1 order status becomes PAID.
+- Test cancel/failure and confirm it never becomes PAID.
+
+5) Live only after successful test
+- Replace the Test API key with the Kuwait Live API key.
+- Change MYFATOORAH_BASE_URL to https://api.myfatoorah.com
+- Deploy again.
+
+6) MyFatoorah webhook
+- URL: https://www.aquafankw.com/api/myfatoorah/webhook
+- Add the same webhook secret in Cloudflare as MYFATOORAH_WEBHOOK_SECRET.
+- Verify one test webhook before relying on it in production.
+
+SECURITY
+- Never add API keys to GitHub, public/, products.json, app.js, or wrangler.jsonc.
+- The Worker calculates prices from the deployed products.json.
+- A callback page does not mark an order paid; /api/verify-payment verifies it with MyFatoorah.

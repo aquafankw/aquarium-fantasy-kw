@@ -57,11 +57,7 @@
     "subCategory": "",
     "price": 45.0,
     "stock": 100,
-    "image": "assets/products/594.jpg",
-"images": [
-  "assets/products/594-2.jpg",
-  "assets/products/594-3.jpg"
-]
+    "image": "assets/products/594.jpg"
   },
   {
     "id": 591,
@@ -73,10 +69,7 @@
     "subCategory": "",
     "price": 35.0,
     "stock": 100,
-    "image": "assets/products/591.jpg",
-"images": [
-  "assets/products/591-2.jpg",
-]
+    "image": "assets/products/591.jpg"
   },
   {
     "id": 588,
@@ -88,11 +81,19 @@
     "subCategory": "",
     "price": 25.0,
     "stock": 100,
-    "image": "assets/products/588.jpg",
-"images": [
-  "assets/products/588-2.jpg",
-  "assets/products/588-3.jpg"
-]
+    "image": "assets/products/588.jpg"
+  },
+  {
+    "id": 585,
+    "nameEn": "Round - XL - (D35XH25)",
+    "nameAr": "دائري - كبيرجدا - (D35XH25)",
+    "descriptionEn": "",
+    "descriptionAr": "",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 35.0,
+    "stock": 100,
+    "image": "assets/products/585.jpg"
   },
   {
     "id": 582,
@@ -104,15 +105,7 @@
     "subCategory": "",
     "price": 25.0,
     "stock": 100,
-    "image": "assets/products/582.jpg",
-"images": [
-  "assets/products/582-2.jpg",
-  "assets/products/582-3.jpg",
-   "assets/products/582-4.jpg",
-   "assets/products/582-5.jpg",
-   "assets/products/582-6.jpg",
-   "assets/products/582-7.jpg"
-]
+    "image": "assets/products/582.jpg"
   },
   {
     "id": 579,
@@ -124,11 +117,7 @@
     "subCategory": "",
     "price": 9.0,
     "stock": 100,
-    "image": "assets/products/579.jpg",
-"images": [
-  "assets/products/579-2.jpg",
-  "assets/products/579-3.jpg"
-]
+    "image": "assets/products/579.jpg"
   },
   {
     "id": 576,
@@ -330,7 +319,7 @@
     "descriptionAr": "سلحفاة 2 + حجر + حوض",
     "category": "Packages",
     "subCategory": "",
-    "price": 6.5,
+    "price": 6.0,
     "stock": 150,
     "image": "assets/products/522.jpg"
   },
@@ -429,6 +418,114 @@
     "price": 15.0,
     "stock": 100,
     "image": "assets/products/476.jpg"
+  },
+  {
+    "id": 470,
+    "nameEn": "Natural Package",
+    "nameAr": "بكج الطبيعة",
+    "descriptionEn": "The package may contain the following depending on the size of the aquarium: Natural Plants - Light - Rocks - Filter - Fog Maker - Various Figures.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض: نباتات طبيعية - إضاءة - صخور - فلتر - صانع الضباب - مجسمات متنوعة.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/470.jpg"
+  },
+  {
+    "id": 467,
+    "nameEn": "SpongeBob Package",
+    "nameAr": "بكج سبونج بوب",
+    "descriptionEn": "The package may contain the following depending on the size of the aquarium: Various Figures - House - Plants - Multi-Coloured Lighting - Small Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:  مجسمات متنوعة - منزل - نباتات - إضاءة متعددة الألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/467.jpg"
+  },
+  {
+    "id": 464,
+    "nameEn": "Princess Package",
+    "nameAr": "بكج الأميرات",
+    "descriptionEn": "The package may contain the following depending on the size\nof the aquarium:   \n\nVarious Figures - House - Plants - Multi-Coloured Lighting -\nSmall Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:   \n\nمجسمات متنوعة - منزل - نباتات - إضاءة متعددة\nالألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/464.jpg"
+  },
+  {
+    "id": 461,
+    "nameEn": "Panda Package",
+    "nameAr": "بكج الباندا",
+    "descriptionEn": "The package may contain the following depending on the size of the aquarium: \nVarious Figures - House - Plants - Multi-Coloured Lighting - Small Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض: مجسمات متنوعة - منزل - نباتات - إضاءة متعددة الألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/461.jpg"
+  },
+  {
+    "id": 458,
+    "nameEn": "Mermaid Package",
+    "nameAr": "بكج حورية البحر",
+    "descriptionEn": "The package may contain the following depending on the size\nof the aquarium:   \n\nVarious Figures - House - Plants - Multi-Coloured Lighting -\nSmall Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:   \n\nمجسمات متنوعة - منزل - نباتات - إضاءة متعددة\nالألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/458.jpg"
+  },
+  {
+    "id": 455,
+    "nameEn": "Fairy Package",
+    "nameAr": "بكج الأميرات الرائعات",
+    "descriptionEn": "The package may contain the following depending on the size\nof the aquarium:   \n\nVarious Figures - House - Plants - Multi-Coloured Lighting -\nSmall Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:    \n\nمجسمات متنوعة - منزل - نباتات - إضاءة متعددة\nالألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/455.jpg"
+  },
+  {
+    "id": 452,
+    "nameEn": "Mind Agent Package",
+    "nameAr": "بكج مايند ايجنت",
+    "descriptionEn": "The package may contain the following depending on the size\nof the aquarium:   \n\nVarious Figures - House - Plants - Multi-Coloured Lighting -\nSmall Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:   \n\nمجسمات متنوعة - منزل - نباتات - إضاءة متعددة\nالألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/452.jpg"
+  },
+  {
+    "id": 449,
+    "nameEn": "Micky Mouse Package",
+    "nameAr": "بكج ميكي ماوس",
+    "descriptionEn": "The package may contain the following depending on the size\nof the aquarium:    \n\nVarious Figures - House - Plants - Multi-Coloured Lighting -\nSmall Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:   \n\nمجسمات متنوعة - منزل - نباتات - إضاءة متعددة\nالألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/449.jpg"
+  },
+  {
+    "id": 446,
+    "nameEn": "Cute Baby Package",
+    "nameAr": "بكج الطفل الصغير",
+    "descriptionEn": "The package may contain the following depending on the size\nof the aquarium:   \n\nVarious Figures - House - Plants - Multi-Coloured Lighting -\nSmall Rock - Mini Rock - Boat - Trees - Shells - Stars.",
+    "descriptionAr": "قد يحتوي البكج على الأتي حسب مقاس الحوض:   \n\nمجسمات متنوعة - منزل - نباتات - إضاءة متعددة\nالألوان - صخر صغير - صخر ميني - قارب - أشجار - صدف - نجوم.",
+    "category": "Packages",
+    "subCategory": "",
+    "price": 0.0,
+    "stock": 100,
+    "image": "assets/products/446.jpg"
   },
   {
     "id": 428,
@@ -1305,6 +1402,18 @@
     "price": 1.5,
     "stock": 100,
     "image": "assets/products/71.jpg"
+  },
+  {
+    "id": 68,
+    "nameEn": "1pc - Cute Baby",
+    "nameAr": "1pc - الطفل الصغير",
+    "descriptionEn": "Cute Baby Figures\n1 piece",
+    "descriptionAr": "شخصيات الطفل اللطيف \n حبة واحدة",
+    "category": "Figures",
+    "subCategory": "",
+    "price": 1.5,
+    "stock": 100,
+    "image": "assets/products/68.jpg"
   },
   {
     "id": 65,

@@ -70,7 +70,17 @@
   <aside class="cart-panel" id="cartPanel" aria-hidden="true" aria-label="سلة التسوق">
     <div class="cart-head"><div><span class="eyebrow" data-ar="طلبك" data-en="Your order">طلبك</span><h2 data-ar="سلة التسوق" data-en="Shopping cart">سلة التسوق</h2></div><button id="closeCart" class="icon-button" type="button" aria-label="إغلاق">×</button></div>
     <div id="cartItems" class="cart-items"></div>
-    <div class="cart-footer"><div class="total"><span data-ar="الإجمالي" data-en="Total">الإجمالي</span><b id="cartTotal">0.000 د.ك</b></div><button class="checkout" id="checkout" type="button" data-ar="إرسال الطلب عبر واتساب" data-en="Send order on WhatsApp">إرسال الطلب عبر واتساب</button><small data-ar="الدفع الإلكتروني والتوصيل سيُربطان في المرحلة التالية." data-en="Online payment and delivery will be connected in the next phase.">الدفع الإلكتروني والتوصيل سيُربطان في المرحلة التالية.</small></div>
+    <div class="cart-footer">
+      <div class="customer-fields">
+        <input id="customerName" type="text" maxlength="100" autocomplete="name" data-placeholder-ar="الاسم الكامل *" data-placeholder-en="Full name *" placeholder="الاسم الكامل *">
+        <input id="customerPhone" type="tel" maxlength="20" inputmode="tel" autocomplete="tel" data-placeholder-ar="رقم الهاتف *" data-placeholder-en="Phone number *" placeholder="رقم الهاتف *">
+        <input id="customerEmail" type="email" maxlength="150" autocomplete="email" data-placeholder-ar="البريد الإلكتروني (اختياري)" data-placeholder-en="Email (optional)" placeholder="البريد الإلكتروني (اختياري)">
+        <textarea id="customerAddress" maxlength="300" autocomplete="street-address" data-placeholder-ar="عنوان التوصيل *" data-placeholder-en="Delivery address *" placeholder="عنوان التوصيل *"></textarea>
+      </div>
+      <div class="total"><span data-ar="الإجمالي" data-en="Total">الإجمالي</span><b id="cartTotal">0.000 د.ك</b></div>
+      <button class="checkout" id="checkout" type="button" data-ar="ادفع الآن عبر MyFatoorah" data-en="Pay now with MyFatoorah">ادفع الآن عبر MyFatoorah</button>
+      <small data-ar="سيتم تحويلك إلى صفحة الدفع الآمنة في MyFatoorah." data-en="You will be redirected to MyFatoorah's secure payment page.">سيتم تحويلك إلى صفحة الدفع الآمنة في MyFatoorah.</small>
+    </div>
   </aside>
   <div class="toast" id="toast" role="status"></div>
   <script src="app.js" defer></script>

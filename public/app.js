@@ -75,12 +75,21 @@ function updateCart() {
   $("#cartTotal").textContent = money(total);
 }
 
-function checkout() {
+async function checkout() {
   const entries = Object.entries(state.cart); if (!entries.length) return showToast(text("أضيفي منتجاً أولاً", "Add a product first"));
-  const lines = entries.map(([id,qty]) => { const p=state.products.find(x=>x.id===Number(id)); return `• ${p.nameAr} (#${p.id}) × ${qty} = ${money(p.price*qty)}`; });
-  const total = entries.reduce((sum,[id,qty]) => { const p=state.products.find(x=>x.id===Number(id)); return sum+p.price*qty; },0);
-  const message = `مرحباً Aquafan، أود طلب:\n${lines.join("\n")}\n\nالإجمالي: ${money(total)}`;
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+  const customer = { name: $("#customerName").value.trim(), phone: $("#customerPhone").value.trim(), email: $("#customerEmail").value.trim(), address: $("#customerAddress").value.trim() };
+  if (!customer.name || !customer.phone || !customer.address) return showToast(text("اكتبي الاسم والهاتف وعنوان التوصيل", "Enter name, phone and delivery address"));
+  const button = $("#checkout"); const original = button.textContent; button.disabled = true; button.textContent = text("جاري فتح الدفع…", "Opening payment…");
+  try {
+    const response = await fetch("/api/create-payment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customer, items: entries.map(([id,quantity]) => ({ id: Number(id), quantity: Number(quantity) })) }) });
+    const result = await response.json();
+    if (!response.ok || !result.invoiceURL) throw new Error(result.error || text("تعذّر إنشاء رابط الدفع", "Could not create payment link"));
+    sessionStorage.setItem("aquafan-last-order", result.orderId || "");
+    window.location.href = result.invoiceURL;
+  } catch (error) {
+    showToast(error.message || text("تعذّر الاتصال بالدفع", "Payment connection failed"));
+    button.disabled = false; button.textContent = original;
+  }
 }
 
 function updateLanguage() {

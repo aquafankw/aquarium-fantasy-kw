@@ -1,0 +1,13 @@
+{
+  "name": "aquafan-kuwait-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/worker.js && node --check public/app.js",
+    "deploy": "wrangler d1 migrations apply aquafan-products --remote && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.33.1"
+  }
+}
