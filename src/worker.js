@@ -6,10 +6,10 @@ export default {
     try {
       if (url.pathname === "/api/create-payment") {
         if (request.method !== "POST") return json({ ok: false, error: "Method Not Allowed" }, 405);
-        return createPayment(request, env);
+        return await createPayment(request, env);
       }
-      if ((request.method === "GET" || request.method === "POST") && url.pathname === "/api/verify-payment") return verifyPayment(request, env);
-      if (request.method === "POST" && url.pathname === "/api/myfatoorah/webhook") return handleWebhook(request, env);
+      if ((request.method === "GET" || request.method === "POST") && url.pathname === "/api/verify-payment") return await verifyPayment(request, env);
+      if (request.method === "POST" && url.pathname === "/api/myfatoorah/webhook") return await handleWebhook(request, env);
       if (url.pathname === "/payment-success") return env.ASSETS.fetch(new URL("/payment-success.html", url));
       if (url.pathname === "/payment-failed") return env.ASSETS.fetch(new URL("/payment-failed.html", url));
       return env.ASSETS.fetch(request);
