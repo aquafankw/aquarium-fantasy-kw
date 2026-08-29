@@ -47,65 +47,73 @@
     "stock": 100,
     "image": "assets/products/597.jpg"
   },
-  {
-    "id": 594,
-    "nameEn": "Rectangle Package- L - (50X27X30)",
-    "nameAr": "بكج مستطيل - كبير (50X27X30)",
-    "descriptionEn": "",
-    "descriptionAr": "",
-    "category": "Packages",
-    "subCategory": "",
-    "price": 45.0,
-    "stock": 100,
-    "image": "assets/products/594.jpg",
-    "image": "assets/products/594-2.jpg",
-    "image": "assets/products/594-3.jpg"
-  },
-  {
-    "id": 591,
-    "nameEn": "Rectangle Package- M - (40X24X25)",
-    "nameAr": "بكج مستطيل - وسط(40X24X25)",
-    "descriptionEn": "",
-    "descriptionAr": "",
-    "category": "Packages",
-    "subCategory": "",
-    "price": 35.0,
-    "stock": 100,
-    "image": "assets/products/591.jpg",
-    "image": "assets/products/591-2.jpg"
-  },
-  {
-    "id": 588,
-    "nameEn": "Rectangle Package- S - (30X18X205)",
-    "nameAr": "بكج مستطيل - صغير  (30X18X205)",
-    "descriptionEn": "",
-    "descriptionAr": "",
-    "category": "Packages",
-    "subCategory": "",
-    "price": 25.0,
-    "stock": 100,
-    "image": "assets/products/588.jpg",
-    "image": "assets/products/588-2.jpg",
-    "image": "assets/products/588-3.jpg"
-  },
-  {
-    "id": 582,
-    "nameEn": "Round - L - (D30XH22))",
-    "nameAr": "دائري - كبير (D30XH22))",
-    "descriptionEn": "",
-    "descriptionAr": "",
-    "category": "Packages",
-    "subCategory": "",
-    "price": 25.0,
-    "stock": 100,
-    "image": "assets/products/582.jpg",
-     "image": "assets/products/582-2.jpg",
-     "image": "assets/products/582-3.jpg",
-     "image": "assets/products/582-4.jpg",
-     "image": "assets/products/582-5.jpg",
-     "image": "assets/products/582-6.jpg",
-    "image": "assets/products/582-7.jpg"
-  },
+ {
+  "id": 594,
+  "nameEn": "Rectangle Package- L - (50X27X30)",
+  "nameAr": "بكج مستطيل - كبير (50X27X30)",
+  "descriptionEn": "",
+  "descriptionAr": "",
+  "category": "Packages",
+  "subCategory": "",
+  "price": 45.0,
+  "stock": 100,
+  "image": "assets/products/594.jpg",
+  "images": [
+    "assets/products/594-2.jpg",
+    "assets/products/594-3.jpg"
+  ]
+},
+{
+  "id": 591,
+  "nameEn": "Rectangle Package- M - (40X24X25)",
+  "nameAr": "بكج مستطيل - وسط(40X24X25)",
+  "descriptionEn": "",
+  "descriptionAr": "",
+  "category": "Packages",
+  "subCategory": "",
+  "price": 35.0,
+  "stock": 100,
+  "image": "assets/products/591.jpg",
+  "images": [
+    "assets/products/591-2.jpg"
+  ]
+},
+{
+  "id": 588,
+  "nameEn": "Rectangle Package- S - (30X18X205)",
+  "nameAr": "بكج مستطيل - صغير (30X18X205)",
+  "descriptionEn": "",
+  "descriptionAr": "",
+  "category": "Packages",
+  "subCategory": "",
+  "price": 25.0,
+  "stock": 100,
+  "image": "assets/products/588.jpg",
+  "images": [
+    "assets/products/588-2.jpg",
+    "assets/products/588-3.jpg"
+  ]
+},
+{
+  "id": 582,
+  "nameEn": "Round - L - (D30XH22))",
+  "nameAr": "دائري - كبير (D30XH22))",
+  "descriptionEn": "",
+  "descriptionAr": "",
+  "category": "Packages",
+  "subCategory": "",
+  "price": 25.0,
+  "stock": 100,
+  "image": "assets/products/582.jpg",
+  "images": [
+    "assets/products/582-2.jpg",
+    "assets/products/582-3.jpg",
+    "assets/products/582-4.jpg",
+    "assets/products/582-5.jpg",
+    "assets/products/582-6.jpg",
+    "assets/products/582-7.jpg"
+  ]
+},
   {
     "id": 579,
     "nameEn": "XL - Exterior Light (60cm)",
