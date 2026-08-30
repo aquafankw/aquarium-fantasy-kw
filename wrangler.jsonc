@@ -12,11 +12,17 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "single-page-application",
     "run_worker_first": [
-  "/api/*",
-  "/admin/api/*",
-  "/products.json"
-]
+      "/api/*",
+      "/admin/api/*",
+      "/products.json"
+    ]
   },
+  "send_email": [
+    {
+      "name": "SEND_EMAIL",
+      "destination_address": "aquafankw@hotmail.com"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
@@ -25,3 +31,4 @@
     }
   ]
 }
+
