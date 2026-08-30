@@ -41,11 +41,11 @@ function renderProducts() {
   $("#products").innerHTML = products.map(productCard).join("") || "<p>لا توجد منتجات مطابقة.</p>";
 }
 function renderStats() {
-  const paid = state.orders.filter(o => o.status === "PAID");
+  const paid = state.orders;
   const today = new Date().toISOString().slice(0,10);
   const sales = paid.filter(o => String(o.created_at).slice(0,10) === today).reduce((sum,o) => sum + Number(o.total || 0),0);
   const unavailable = state.products.filter(p => !p.isAvailable || Number(p.stock) < 1).length;
-  $("#stats").innerHTML = `<div class="stat"><small>كل الطلبات</small><strong>${state.orders.length}</strong></div><div class="stat"><small>طلبات مدفوعة</small><strong>${paid.length}</strong></div><div class="stat"><small>تحت التوصيل</small><strong>${state.orders.filter(o => ["SENT_TO_ARMADA","ACCEPTED","DISPATCHED","EN_ROUTE"].includes(o.delivery_status)).length}</strong></div><div class="stat"><small>مبيعات اليوم</small><strong>${money(sales)}</strong><small>غير متوفر: ${unavailable}</small></div>`;
+  $("#stats").innerHTML = `<div class="stat"><small>الطلبات المدفوعة</small><strong>${paid.length}</strong></div><div class="stat"><small>جديدة للتجهيز</small><strong>${paid.filter(o => o.delivery_status === "NEW").length}</strong></div><div class="stat"><small>تحت التوصيل</small><strong>${paid.filter(o => ["SENT_TO_ARMADA","ACCEPTED","DISPATCHED","EN_ROUTE"].includes(o.delivery_status)).length}</strong></div><div class="stat"><small>مبيعات اليوم</small><strong>${money(sales)}</strong><small>غير متوفر: ${unavailable}</small></div>`;
 }
 function notifyNewPaid() {
   const paidIds = state.orders.filter(o => o.status === "PAID").map(o => o.id);
@@ -55,7 +55,7 @@ function notifyNewPaid() {
   localStorage.setItem("aquafanSeenPaid", JSON.stringify([...state.seenPaid].slice(-500)));
 }
 async function load() {
-  try { setMessage("" ); const [orders, products] = await Promise.all([api("/admin/api/orders"), api("/admin/api/products")]); state.orders = orders.orders; state.products = products.products; notifyNewPaid(); renderStats(); renderOrders(); renderProducts(); } catch (e) { setMessage(e.message); }
+  try { setMessage("" ); const [orders, products] = await Promise.all([api("/admin/api/orders"), api("/admin/api/products")]); state.orders = (orders.orders || []).filter(order => order.status === "PAID"); state.products = products.products; notifyNewPaid(); renderStats(); renderOrders(); renderProducts(); } catch (e) { setMessage(e.message); }
 }
 document.addEventListener("click", async event => {
   const productId = event.target.dataset.saveProduct;
