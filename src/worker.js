@@ -143,15 +143,23 @@ async function sendPaidOrderEmailOnce(env, orderId) {
 
   try {
     const items = safeJson(order.items_json, []);
-    const itemLines = items.map(item => `- ${item.name} × ${item.quantity} — ${roundKwd(Number(item.unitPrice) * Number(item.quantity)).toFixed(3)} د.ك`).join("\n");
+    const productCatalog = await loadProducts(env, SITE_URL);
+    const imageByProductId = new Map(productCatalog.map(product => [Number(product.id), absoluteProductImage(product.image)]));
+    const itemLines = items.map(item => `- ${item.name}: ${item.quantity} × ${Number(item.unitPrice).toFixed(3)} د.ك`).join("\n");
     const itemRows = items.map(item => {
       const quantity = Number(item.quantity);
       const unitPrice = Number(item.unitPrice);
+      const imageUrl = imageByProductId.get(Number(item.id)) || "";
       return `<table role="presentation" dir="rtl" style="width:100%;max-width:100%;border-collapse:collapse;margin:0 0 12px;font-size:14px;table-layout:fixed">
-        <tr><th style="width:34%;padding:9px;border:1px solid #d8e4e8;background:#edf6f7;text-align:right">المنتج</th><td style="padding:9px;border:1px solid #d8e4e8;text-align:right;overflow-wrap:anywhere">${escapeHtml(item.name)}</td></tr>
-        <tr><th style="padding:9px;border:1px solid #d8e4e8;background:#edf6f7;text-align:right">الكمية</th><td style="padding:9px;border:1px solid #d8e4e8;text-align:right">${quantity}</td></tr>
-        <tr><th style="padding:9px;border:1px solid #d8e4e8;background:#edf6f7;text-align:right">سعر الوحدة</th><td style="padding:9px;border:1px solid #d8e4e8;text-align:right">${unitPrice.toFixed(3)} د.ك</td></tr>
-        <tr><th style="padding:9px;border:1px solid #d8e4e8;background:#edf6f7;text-align:right">إجمالي المنتج</th><td style="padding:9px;border:1px solid #d8e4e8;text-align:right;font-weight:bold">${roundKwd(unitPrice * quantity).toFixed(3)} د.ك</td></tr>
+        <tr>
+          <td style="width:88px;padding:9px;border:1px solid #d8e4e8;background:#f8fbfc;text-align:center">
+            ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" width="70" height="70" alt="${escapeHtml(item.name)}" style="display:block;width:70px;height:70px;margin:auto;object-fit:cover;border-radius:8px">` : ""}
+          </td>
+          <td style="padding:12px;border:1px solid #d8e4e8;text-align:right;overflow-wrap:anywhere">
+            <div style="font-size:15px;font-weight:bold;margin-bottom:8px">${escapeHtml(item.name)}</div>
+            <div style="color:#355d66">${quantity} × ${unitPrice.toFixed(3)} د.ك</div>
+          </td>
+        </tr>
       </table>`;
     }).join("");
     const text = [
@@ -298,6 +306,7 @@ function validateRequestedItems(items) { if (!Array.isArray(items) || !items.len
 function normalizeKuwaitMobile(value) { const digits = String(value).replace(/\D/g, ""); return digits.startsWith("965") ? digits.slice(3) : digits; }
 function safeJson(value, fallback) { try { return JSON.parse(value); } catch { return fallback; } }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[character])); }
+function absoluteProductImage(value) { const image = String(value || "").trim(); if (!image) return ""; try { return new URL(image.replace(/^\/+/, ""), `${SITE_URL}/`).href; } catch { return ""; } }
 function clean(value, max) { return String(value || "").trim().slice(0, max); }
 function roundKwd(value) { return Math.round(Number(value) * 1000) / 1000; }
 function requireConfig(env, names) { const missing = names.filter(name => !env[name]); if (missing.length) throw new HttpError(`إعداد ناقص: ${missing.join(", ")}`, 503); }
