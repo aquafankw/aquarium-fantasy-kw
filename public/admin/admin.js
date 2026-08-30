@@ -12,10 +12,19 @@ async function api(path, options = {}) {
 function setMessage(text = "") { $("#message").textContent = text; }
 function badge(status) { const cls = String(status).toLowerCase(); return `<span class="badge ${cls}">${escapeHtml(status)}</span>`; }
 function readItems(raw) { try { return JSON.parse(raw || "[]"); } catch { return []; } }
+function orderItemRows(raw) {
+  const items = readItems(raw);
+  if (!items.length) return "—";
+  return items.map(item => {
+    const product = state.products.find(entry => Number(entry.id) === Number(item.id));
+    const image = product?.image ? `/${escapeHtml(product.image)}` : "/admin/icon-192.png";
+    return `<div class="order-item"><img src="${image}" alt="" loading="lazy"><div><b>${escapeHtml(item.name)}</b><span>الكمية: ${Number(item.quantity || 0)}</span></div></div>`;
+  }).join("");
+}
 function orderCard(order) {
-  const items = readItems(order.items_json).map(item => `${escapeHtml(item.name)} × ${item.quantity}`).join("<br>") || "—";
+  const items = orderItemRows(order.items_json);
   const deliveryOptions = ["NEW","PREPARING","READY","SENT_TO_ARMADA","ACCEPTED","DISPATCHED","EN_ROUTE","COMPLETED","FAILED","CANCELED"].map(x => `<option ${x === order.delivery_status ? "selected" : ""}>${x}</option>`).join("");
-  return `<article class="card"><div class="row"><div><h3>${escapeHtml(order.id)}</h3><div class="muted">${escapeHtml(order.created_at)}<br>${escapeHtml(order.customer_name)} · ${escapeHtml(order.customer_phone)}<br>${escapeHtml(order.customer_address)}</div></div><div>${badge(order.status)}<br><br>${badge(order.delivery_status)}</div></div><div class="items"><b>المنتجات</b><br>${items}<br><br><b>الإجمالي: ${money(order.total)}</b></div><div class="delivery"><select data-delivery-status="${escapeHtml(order.id)}">${deliveryOptions}</select><input data-tracking="${escapeHtml(order.id)}" value="${escapeHtml(order.tracking_url)}" placeholder="رابط تتبع Armada (اختياري)"><button class="save" data-save-delivery="${escapeHtml(order.id)}">حفظ التوصيل</button></div></article>`;
+  return `<article class="card"><div class="row"><div><h3>${escapeHtml(order.id)}</h3><div class="muted">${escapeHtml(order.created_at)}<br>${escapeHtml(order.customer_name)} · ${escapeHtml(order.customer_phone)}<br>${escapeHtml(order.customer_address)}</div></div><div>${badge(order.status)}<br><br>${badge(order.delivery_status)}</div></div><div class="items"><b>المنتجات</b><div class="order-items">${items}</div><b>الإجمالي: ${money(order.total)}</b></div><div class="delivery"><select data-delivery-status="${escapeHtml(order.id)}">${deliveryOptions}</select><input data-tracking="${escapeHtml(order.id)}" value="${escapeHtml(order.tracking_url)}" placeholder="رابط تتبع Armada (اختياري)"><button class="save" data-save-delivery="${escapeHtml(order.id)}">حفظ التوصيل</button></div></article>`;
 }
 function renderOrders() {
   const term = $("#orderSearch").value.trim().toLowerCase();
