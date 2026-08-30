@@ -4,6 +4,11 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     try {
+      if (request.method === "GET" && url.pathname === "/products.json") {
+        if (url.searchParams.get("source") === "assets") return env.ASSETS.fetch(request);
+        return json(await loadProducts(env, request.url));
+      }
+      if (url.pathname.startsWith("/admin/api/")) return await handleAdminApi(request, env, url);
       if (url.pathname === "/api/create-payment") {
         if (request.method !== "POST") return json({ ok: false, error: "Method Not Allowed" }, 405);
         return await createPayment(request, env);
@@ -34,7 +39,7 @@ async function createPayment(request, env) {
   const productMap = new Map(products.map(product => [Number(product.id), product]));
   const items = requestedItems.map(item => {
     const product = productMap.get(item.id);
-    if (!product || Number(product.stock) <= 0) throw new HttpError("أحد المنتجات غير متوفر.", 400);
+    if (!product || Number(product.stock) <= 0 || product.isAvailable === false) throw new HttpError("أحد المنتجات غير متوفر.", 400);
     if (item.quantity > Number(product.stock)) throw new HttpError("الكمية المطلوبة غير متوفرة.", 400);
     const unitPrice = roundKwd(product.price);
     if (!Number.isFinite(unitPrice) || unitPrice < 0) throw new HttpError("سعر منتج غير صالح.", 500);
@@ -106,10 +111,58 @@ async function handleWebhook(request, env) {
   return new Response("OK", { status: 200 });
 }
 
+async function handleAdminApi(request, env, url) {
+  requireConfig(env, ["DB"]);
+  if (request.method === "GET" && url.pathname === "/admin/api/orders") {
+    const result = await env.DB.prepare(`SELECT o.*, COALESCE(d.delivery_status, 'NEW') AS delivery_status, COALESCE(d.tracking_url, '') AS tracking_url FROM orders o LEFT JOIN order_delivery d ON d.order_id=o.id ORDER BY o.created_at DESC LIMIT 200`).all();
+    return json({ ok: true, orders: result.results || [] });
+  }
+  if (request.method === "GET" && url.pathname === "/admin/api/products") return json({ ok: true, products: await loadProducts(env, request.url) });
+  const productMatch = url.pathname.match(/^\/admin\/api\/products\/(\d+)$/);
+  if (request.method === "PATCH" && productMatch) return updateProductOverride(request, env, Number(productMatch[1]), url);
+  const deliveryMatch = url.pathname.match(/^\/admin\/api\/orders\/([^/]+)\/delivery$/);
+  if (request.method === "PATCH" && deliveryMatch) return updateDelivery(request, env, decodeURIComponent(deliveryMatch[1]));
+  return json({ ok: false, error: "المسار غير موجود." }, 404);
+}
+
+async function updateProductOverride(request, env, productId, url) {
+  const products = await loadProducts(env, url.toString());
+  if (!products.some(product => Number(product.id) === productId)) throw new HttpError("المنتج غير موجود.", 404);
+  const body = await readJson(request);
+  const stock = Number(body.stock);
+  const price = Number(body.price);
+  const isAvailable = body.isAvailable ? 1 : 0;
+  if (!Number.isInteger(stock) || stock < 0 || stock > 100000) throw new HttpError("الكمية غير صالحة.", 400);
+  if (!Number.isFinite(price) || price < 0 || price > 100000) throw new HttpError("السعر غير صالح.", 400);
+  await env.DB.prepare(`INSERT INTO product_overrides (product_id, stock, is_available, price, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(product_id) DO UPDATE SET stock=excluded.stock, is_available=excluded.is_available, price=excluded.price, updated_at=CURRENT_TIMESTAMP`)
+    .bind(productId, stock, isAvailable, roundKwd(price)).run();
+  return json({ ok: true });
+}
+
+async function updateDelivery(request, env, orderId) {
+  const body = await readJson(request);
+  const status = String(body.status || "NEW").toUpperCase();
+  const trackingUrl = clean(body.trackingUrl, 500);
+  const allowed = ["NEW", "PREPARING", "READY", "SENT_TO_ARMADA", "ACCEPTED", "DISPATCHED", "EN_ROUTE", "COMPLETED", "FAILED", "CANCELED"];
+  if (!allowed.includes(status)) throw new HttpError("حالة التوصيل غير صالحة.", 400);
+  const exists = await env.DB.prepare("SELECT id FROM orders WHERE id=?").bind(orderId).first();
+  if (!exists) throw new HttpError("الطلب غير موجود.", 404);
+  await env.DB.prepare(`INSERT INTO order_delivery (order_id, delivery_status, tracking_url, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(order_id) DO UPDATE SET delivery_status=excluded.delivery_status, tracking_url=excluded.tracking_url, updated_at=CURRENT_TIMESTAMP`)
+    .bind(orderId, status, trackingUrl).run();
+  return json({ ok: true });
+}
+
 async function loadProducts(env, requestUrl) {
-  const response = await env.ASSETS.fetch(new URL("/products.json", requestUrl));
+  const response = await env.ASSETS.fetch(new URL("/products.json?source=assets", requestUrl));
   if (!response.ok) throw new HttpError("تعذّر تحميل قائمة المنتجات.", 500);
-  return response.json();
+  const products = await response.json();
+  const overrides = await env.DB.prepare("SELECT product_id, stock, is_available, price FROM product_overrides").all();
+  const overrideMap = new Map((overrides.results || []).map(row => [Number(row.product_id), row]));
+  return products.map(product => {
+    const override = overrideMap.get(Number(product.id));
+    if (!override) return { ...product, isAvailable: Number(product.stock) > 0 };
+    return { ...product, stock: Number(override.stock), price: Number(override.price), isAvailable: Boolean(override.is_available) && Number(override.stock) > 0 };
+  });
 }
 
 async function myFatoorah(env, path, payload) {
@@ -124,50 +177,23 @@ async function myFatoorah(env, path, payload) {
 }
 
 function validateCustomer(value = {}) {
-  const customer = {
-    name: clean(value.name, 100), phone: clean(value.phone, 20), email: clean(value.email, 150),
-    governorate: clean(value.governorate, 60), area: clean(value.area, 80), block: clean(value.block, 20),
-    street: clean(value.street, 100), avenue: clean(value.avenue, 60), building: clean(value.building, 40),
-    floor: clean(value.floor, 20), apartment: clean(value.apartment, 20), notes: clean(value.notes, 200),
-    address: clean(value.address, 500)
-  };
+  const customer = { name: clean(value.name, 100), phone: clean(value.phone, 20), email: clean(value.email, 150), governorate: clean(value.governorate, 60), area: clean(value.area, 80), block: clean(value.block, 20), street: clean(value.street, 100), avenue: clean(value.avenue, 60), building: clean(value.building, 40), floor: clean(value.floor, 20), apartment: clean(value.apartment, 20), notes: clean(value.notes, 200), address: clean(value.address, 500) };
   if (customer.name.length < 2) throw new HttpError("اكتبي اسم العميل.", 400);
   if (!/^\+?\d[\d\s-]{6,18}$/.test(customer.phone)) throw new HttpError("رقم الهاتف غير صالح.", 400);
   if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) throw new HttpError("البريد الإلكتروني غير صالح.", 400);
   if (!customer.address) {
     if (!customer.governorate || !customer.area || !customer.block || !customer.street || !customer.building) throw new HttpError("أكملي المحافظة والمنطقة والقطعة والشارع والمنزل أو المبنى.", 400);
-    customer.address = [
-      `المحافظة: ${customer.governorate}`, `المنطقة: ${customer.area}`, `القطعة: ${customer.block}`,
-      `الشارع: ${customer.street}`, customer.avenue && `الجادة: ${customer.avenue}`, `المنزل/المبنى: ${customer.building}`,
-      customer.floor && `الدور: ${customer.floor}`, customer.apartment && `الشقة: ${customer.apartment}`,
-      customer.notes && `ملاحظات: ${customer.notes}`
-    ].filter(Boolean).join("، ");
+    customer.address = [`المحافظة: ${customer.governorate}`, `المنطقة: ${customer.area}`, `القطعة: ${customer.block}`, `الشارع: ${customer.street}`, customer.avenue && `الجادة: ${customer.avenue}`, `المنزل/المبنى: ${customer.building}`, customer.floor && `الدور: ${customer.floor}`, customer.apartment && `الشقة: ${customer.apartment}`, customer.notes && `ملاحظات: ${customer.notes}`].filter(Boolean).join("، ");
   }
   return customer;
 }
-function validateRequestedItems(items) {
-  if (!Array.isArray(items) || !items.length || items.length > 100) throw new HttpError("السلة فارغة أو غير صالحة.", 400);
-  return items.map(item => { const id = Number(item.id); const quantity = Number(item.quantity); if (!Number.isInteger(id) || !Number.isInteger(quantity) || quantity < 1 || quantity > 50) throw new HttpError("بيانات منتج غير صالحة.", 400); return { id, quantity }; });
-}
+function validateRequestedItems(items) { if (!Array.isArray(items) || !items.length || items.length > 100) throw new HttpError("السلة فارغة أو غير صالحة.", 400); return items.map(item => { const id = Number(item.id); const quantity = Number(item.quantity); if (!Number.isInteger(id) || !Number.isInteger(quantity) || quantity < 1 || quantity > 50) throw new HttpError("بيانات منتج غير صالحة.", 400); return { id, quantity }; }); }
 function normalizeKuwaitMobile(value) { const digits = String(value).replace(/\D/g, ""); return digits.startsWith("965") ? digits.slice(3) : digits; }
 function clean(value, max) { return String(value || "").trim().slice(0, max); }
 function roundKwd(value) { return Math.round(Number(value) * 1000) / 1000; }
 function requireConfig(env, names) { const missing = names.filter(name => !env[name]); if (missing.length) throw new HttpError(`إعداد ناقص: ${missing.join(", ")}`, 503); }
 async function readJson(request) { try { return await request.json(); } catch { throw new HttpError("بيانات الطلب غير صالحة.", 400); } }
-async function verifyHmac(message, supplied, secret) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  const hex = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
-  return timingSafeEqual(supplied.trim().toLowerCase(), hex) || timingSafeEqual(supplied.trim(), base64);
-}
+async function verifyHmac(message, supplied, secret) { const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]); const digest = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message)); const bytes = new Uint8Array(digest); const hex = [...bytes].map(byte => byte.toString(16).padStart(2, "0")).join(""); const base64 = btoa(String.fromCharCode(...bytes)); return timingSafeEqual(supplied.trim().toLowerCase(), hex) || timingSafeEqual(supplied.trim(), base64); }
 function timingSafeEqual(a, b) { if (a.length !== b.length) return false; let diff = 0; for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i); return diff === 0; }
 function json(body, status = 200) { return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } }); }
-class HttpError extends Error {
-  constructor(message, status) {
-    super(message);
-    this.name = "HttpError";
-    this.message = message;
-    this.status = status;
-  }
-}
+class HttpError extends Error { constructor(message, status) { super(message); this.name = "HttpError"; this.message = message; this.status = status; } }

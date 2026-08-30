@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#075a70">
+  <link rel="manifest" href="/admin/manifest.webmanifest">
+  <link rel="stylesheet" href="/admin/admin.css">
+  <title>Aquafan Admin</title>
+</head>
+<body>
+  <header><div><p class="eyebrow">Aquafan Kuwait</p><h1>لوحة التحكم</h1></div><div class="actions"><button id="notifyButton">تفعيل التنبيه داخل التطبيق</button><button id="refreshButton">تحديث</button></div></header>
+  <main>
+    <p id="message" class="message" aria-live="polite"></p>
+    <section id="stats" class="stats"></section>
+    <section class="panel"><div class="panel-title"><h2>الطلبات</h2><input id="orderSearch" placeholder="ابحثي برقم الطلب أو الاسم أو الهاتف"></div><div id="orders" class="cards"></div></section>
+    <section class="panel"><div class="panel-title"><h2>المنتجات والمخزون</h2><input id="productSearch" placeholder="ابحثي باسم المنتج أو الرقم"></div><div id="products" class="products"></div></section>
+  </main>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

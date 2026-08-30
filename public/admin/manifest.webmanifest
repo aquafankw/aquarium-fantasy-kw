@@ -1,0 +1,10 @@
+{
+  "name": "Aquafan Admin",
+  "short_name": "Aquafan Admin",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#f2f7f8",
+  "theme_color": "#075a70",
+  "icons": [{"src":"/admin/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
