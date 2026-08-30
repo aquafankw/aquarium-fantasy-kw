@@ -3,6 +3,9 @@
   "name": "aquarium-fantasy-kw",
   "main": "src/worker.js",
   "compatibility_date": "2026-08-28",
+  "vars": {
+    "MYFATOORAH_BASE_URL": "https://api.myfatoorah.com"
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
