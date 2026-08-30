@@ -89,8 +89,12 @@ async function verifyPayment(request, env) {
   const paid = String(data.InvoiceStatus || "").toUpperCase() === "PAID";
   const orderId = String(data.CustomerReference || "");
   if (orderId) {
-    await env.DB.prepare("UPDATE orders SET status=?, payment_id=?, invoice_id=COALESCE(NULLIF(?,''),invoice_id), updated_at=CURRENT_TIMESTAMP WHERE id=?")
-      .bind(paid ? "PAID" : "FAILED", paymentId, String(data.InvoiceId || ""), orderId).run();
+    await updatePaymentAndNotify(env, {
+      orderId,
+      status: paid ? "PAID" : "FAILED",
+      paymentId,
+      invoiceId: String(data.InvoiceId || "")
+    });
   }
   return json({ ok: true, paid, orderId, status: data.InvoiceStatus || "UNKNOWN" });
 }
@@ -107,8 +111,68 @@ async function handleWebhook(request, env) {
   const invoiceId = String(data.InvoiceId || data.invoiceId || "");
   const statusText = String(data.InvoiceStatus || data.TransactionStatus || data.status || "").toUpperCase();
   const status = statusText === "PAID" || statusText === "SUCCESS" ? "PAID" : "FAILED";
-  if (orderId) await env.DB.prepare("UPDATE orders SET status=?,payment_id=COALESCE(NULLIF(?,''),payment_id),invoice_id=COALESCE(NULLIF(?,''),invoice_id),updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(status, paymentId, invoiceId, orderId).run();
+  if (orderId) await updatePaymentAndNotify(env, { orderId, status, paymentId, invoiceId });
   return new Response("OK", { status: 200 });
+}
+
+async function updatePaymentAndNotify(env, { orderId, status, paymentId, invoiceId }) {
+  await env.DB.prepare("UPDATE orders SET status=?,payment_id=COALESCE(NULLIF(?,''),payment_id),invoice_id=COALESCE(NULLIF(?,''),invoice_id),updated_at=CURRENT_TIMESTAMP WHERE id=?")
+    .bind(status, paymentId, invoiceId, orderId).run();
+
+  if (status !== "PAID") return;
+  try {
+    await sendPaidOrderEmailOnce(env, orderId);
+  } catch (error) {
+    console.error("Paid order email error", orderId, error);
+  }
+}
+
+async function sendPaidOrderEmailOnce(env, orderId) {
+  if (!env.SEND_EMAIL) {
+    console.error("SEND_EMAIL binding is missing");
+    return;
+  }
+
+  const order = await env.DB.prepare(`SELECT id, customer_name, customer_phone, customer_address, items_json, subtotal, delivery_fee, total, payment_id, created_at FROM orders WHERE id=? AND status='PAID'`)
+    .bind(orderId).first();
+  if (!order) return;
+
+  const claim = await env.DB.prepare("INSERT OR IGNORE INTO order_email_notifications (order_id) VALUES (?)")
+    .bind(orderId).run();
+  if (Number(claim?.meta?.changes || 0) !== 1) return;
+
+  try {
+    const items = safeJson(order.items_json, []);
+    const itemLines = items.map(item => `- ${item.name} × ${item.quantity} — ${roundKwd(Number(item.unitPrice) * Number(item.quantity)).toFixed(3)} د.ك`).join("\\n");
+    const text = [
+      "تم استلام طلب مدفوع جديد في Aquafan Kuwait.",
+      "",
+      `رقم الطلب: ${order.id}`,
+      `اسم العميل: ${order.customer_name}`,
+      `الهاتف: ${order.customer_phone}`,
+      `العنوان: ${order.customer_address}`,
+      "",
+      "المنتجات:",
+      itemLines || "لا توجد تفاصيل منتجات.",
+      "",
+      `إجمالي المنتجات: ${Number(order.subtotal).toFixed(3)} د.ك`,
+      `رسوم التوصيل: ${Number(order.delivery_fee).toFixed(3)} د.ك`,
+      `الإجمالي المدفوع: ${Number(order.total).toFixed(3)} د.ك`,
+      `Payment ID: ${order.payment_id || "-"}`,
+      "",
+      `فتح لوحة التحكم: ${SITE_URL}/admin/`
+    ].join("\\n");
+
+    await env.SEND_EMAIL.send({
+      from: "Aquafan Orders <orders@aquafankw.com>",
+      to: "aquafankw@hotmail.com",
+      subject: `طلب مدفوع جديد - ${order.id}`,
+      text
+    });
+  } catch (error) {
+    await env.DB.prepare("DELETE FROM order_email_notifications WHERE order_id=?").bind(orderId).run();
+    throw error;
+  }
 }
 
 async function handleAdminApi(request, env, url) {
@@ -189,6 +253,7 @@ function validateCustomer(value = {}) {
 }
 function validateRequestedItems(items) { if (!Array.isArray(items) || !items.length || items.length > 100) throw new HttpError("السلة فارغة أو غير صالحة.", 400); return items.map(item => { const id = Number(item.id); const quantity = Number(item.quantity); if (!Number.isInteger(id) || !Number.isInteger(quantity) || quantity < 1 || quantity > 50) throw new HttpError("بيانات منتج غير صالحة.", 400); return { id, quantity }; }); }
 function normalizeKuwaitMobile(value) { const digits = String(value).replace(/\D/g, ""); return digits.startsWith("965") ? digits.slice(3) : digits; }
+function safeJson(value, fallback) { try { return JSON.parse(value); } catch { return fallback; } }
 function clean(value, max) { return String(value || "").trim().slice(0, max); }
 function roundKwd(value) { return Math.round(Number(value) * 1000) / 1000; }
 function requireConfig(env, names) { const missing = names.filter(name => !env[name]); if (missing.length) throw new HttpError(`إعداد ناقص: ${missing.join(", ")}`, 503); }
