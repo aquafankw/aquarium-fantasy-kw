@@ -23,7 +23,12 @@ export default {
 async function createPayment(request, env) {
   requireConfig(env, ["MYFATOORAH_API_KEY", "MYFATOORAH_BASE_URL", "DB"]);
   const body = await readJson(request);
-  const customer = validateCustomer(body.customer);
+  const customer = validateCustomer(body.customer || {
+    name: body.customerName || body.name,
+    phone: body.customerPhone || body.phone,
+    email: body.customerEmail || body.email,
+    address: body.customerAddress || body.address
+  });
   const requestedItems = validateRequestedItems(body.items);
   const products = await loadProducts(env, request.url);
   const productMap = new Map(products.map(product => [Number(product.id), product]));
@@ -119,11 +124,25 @@ async function myFatoorah(env, path, payload) {
 }
 
 function validateCustomer(value = {}) {
-  const customer = { name: clean(value.name, 100), phone: clean(value.phone, 20), email: clean(value.email, 150), address: clean(value.address, 300) };
+  const customer = {
+    name: clean(value.name, 100), phone: clean(value.phone, 20), email: clean(value.email, 150),
+    governorate: clean(value.governorate, 60), area: clean(value.area, 80), block: clean(value.block, 20),
+    street: clean(value.street, 100), avenue: clean(value.avenue, 60), building: clean(value.building, 40),
+    floor: clean(value.floor, 20), apartment: clean(value.apartment, 20), notes: clean(value.notes, 200),
+    address: clean(value.address, 500)
+  };
   if (customer.name.length < 2) throw new HttpError("اكتبي اسم العميل.", 400);
   if (!/^\+?\d[\d\s-]{6,18}$/.test(customer.phone)) throw new HttpError("رقم الهاتف غير صالح.", 400);
   if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) throw new HttpError("البريد الإلكتروني غير صالح.", 400);
-  if (customer.address.length < 5) throw new HttpError("اكتبي عنوان التوصيل.", 400);
+  if (!customer.address) {
+    if (!customer.governorate || !customer.area || !customer.block || !customer.street || !customer.building) throw new HttpError("أكملي المحافظة والمنطقة والقطعة والشارع والمنزل أو المبنى.", 400);
+    customer.address = [
+      `المحافظة: ${customer.governorate}`, `المنطقة: ${customer.area}`, `القطعة: ${customer.block}`,
+      `الشارع: ${customer.street}`, customer.avenue && `الجادة: ${customer.avenue}`, `المنزل/المبنى: ${customer.building}`,
+      customer.floor && `الدور: ${customer.floor}`, customer.apartment && `الشقة: ${customer.apartment}`,
+      customer.notes && `ملاحظات: ${customer.notes}`
+    ].filter(Boolean).join("، ");
+  }
   return customer;
 }
 function validateRequestedItems(items) {
@@ -144,4 +163,11 @@ async function verifyHmac(message, supplied, secret) {
 }
 function timingSafeEqual(a, b) { if (a.length !== b.length) return false; let diff = 0; for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i); return diff === 0; }
 function json(body, status = 200) { return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } }); }
-class HttpError extends Error { constructor(message, status) { super(message); this.status = status; } }
+class HttpError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = "HttpError";
+    this.message = message;
+    this.status = status;
+  }
+}
