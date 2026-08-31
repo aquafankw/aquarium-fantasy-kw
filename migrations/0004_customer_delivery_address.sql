@@ -1,0 +1,9 @@
+ALTER TABLE orders ADD COLUMN customer_governorate TEXT;
+ALTER TABLE orders ADD COLUMN customer_area TEXT;
+ALTER TABLE orders ADD COLUMN customer_block TEXT;
+ALTER TABLE orders ADD COLUMN customer_street TEXT;
+ALTER TABLE orders ADD COLUMN customer_avenue TEXT;
+ALTER TABLE orders ADD COLUMN customer_building TEXT;
+ALTER TABLE orders ADD COLUMN customer_floor TEXT;
+ALTER TABLE orders ADD COLUMN customer_apartment TEXT;
+ALTER TABLE orders ADD COLUMN customer_notes TEXT;
