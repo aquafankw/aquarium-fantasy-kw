@@ -279,7 +279,17 @@ async function handleAdminApi(request, env, url) {
   const productMatch = url.pathname.match(/^\/admin\/api\/products\/(\d+)$/);
   if (request.method === "PATCH" && productMatch) return updateProductOverride(request, env, Number(productMatch[1]), url);
   const deliveryMatch = url.pathname.match(/^\/admin\/api\/orders\/([^/]+)\/delivery$/);
-  if (request.method === "PATCH" && deliveryMatch) return updateDelivery(request, env, decodeURIComponent(deliveryMatch[1]));
+  if (request.method === "PATCH" && deliveryMatch) return updateDelivery(request, env, decodeURIComponent(deliveryMatch[1]));const armadaMatch = url.pathname.match(
+  /^\/admin\/api\/orders\/([^/]+)\/send-armada$/
+);
+
+if (request.method === "POST" && armadaMatch) {
+  return sendOrderToArmada(
+    request,
+    env,
+    decodeURIComponent(armadaMatch[1])
+  );
+}
   return json({ ok: false, error: "المسار غير موجود." }, 404);
 }
 
@@ -297,6 +307,208 @@ async function updateProductOverride(request, env, productId, url) {
   return json({ ok: true });
 }
 
+async function sendOrderToArmada(request, env, orderId) {
+  requireConfig(env, [
+    "DB",
+    "ARMADA_API_KEY",
+    "ARMADA_API_SECRET",
+    "ARMADA_BRANCH_ID"
+  ]);
+
+  const order = await env.DB
+    .prepare("SELECT * FROM orders WHERE id = ?")
+    .bind(orderId)
+    .first();
+
+  if (!order) {
+    throw new HttpError("الطلب غير موجود.", 404);
+  }
+
+  if (order.status !== "PAID") {
+    throw new HttpError(
+      "لا يمكن إرسال الطلب قبل تأكيد الدفع.",
+      400
+    );
+  }
+
+  const existing = await env.DB
+    .prepare(
+      "SELECT armada_delivery_id, tracking_url FROM order_delivery WHERE order_id = ?"
+    )
+    .bind(orderId)
+    .first();
+
+  if (existing?.armada_delivery_id) {
+    return json({
+      ok: true,
+      alreadySent: true,
+      trackingUrl: existing.tracking_url || ""
+    });
+  }
+
+  const input = await readJson(request);
+
+  const area = clean(input.area, 80);
+  const block = clean(input.block, 30);
+  const street = clean(input.street, 100);
+  const building = clean(input.building, 50);
+  const floor = clean(input.floor, 30);
+  const apartment = clean(input.apartment, 30);
+  const instructions = clean(input.instructions, 300);
+
+  if (!area || !block || !street || !building) {
+    throw new HttpError(
+      "عنوان العميل ناقص. يجب وجود المنطقة والقطعة والشارع والمنزل.",
+      400
+    );
+  }
+
+  const payload = {
+    reference: order.id,
+    payment: {
+      amount: roundKwd(order.total),
+      type: "paid"
+    },
+    origin_format: "branch_format",
+    origin: {
+      branch_id: env.ARMADA_BRANCH_ID
+    },
+    destination_format: "kuwait_format",
+    destination: {
+      contact_name: order.customer_name,
+      contact_phone: `+965${normalizeKuwaitMobile(order.customer_phone)}`,
+      area,
+      block,
+      street,
+      building,
+      floor: floor || undefined,
+      apartment: apartment || undefined,
+      instructions: instructions || order.customer_address
+    }
+  };
+
+  const armada = await armadaRequest(
+    env,
+    "POST",
+    "/v2/deliveries",
+    payload
+  );
+
+  const deliveryId = String(armada.id || "");
+
+  if (!deliveryId) {
+    throw new HttpError(
+      "Armada لم ترجع رقم طلب التوصيل.",
+      502
+    );
+  }
+
+  const trackingUrl = String(
+    armada?.logistics?.tracking_url ||
+    armada.trackingLink ||
+    ""
+  );
+
+  const code = String(armada.code || "");
+
+  await env.DB.prepare(`
+    INSERT INTO order_delivery (
+      order_id,
+      delivery_status,
+      tracking_url,
+      armada_delivery_id,
+      armada_code,
+      delivery_fee,
+      updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(order_id) DO UPDATE SET
+      delivery_status = excluded.delivery_status,
+      tracking_url = excluded.tracking_url,
+      armada_delivery_id = excluded.armada_delivery_id,
+      armada_code = excluded.armada_code,
+      delivery_fee = excluded.delivery_fee,
+      updated_at = CURRENT_TIMESTAMP
+  `)
+    .bind(
+      order.id,
+      String(armada.status || "PENDING").toUpperCase(),
+      trackingUrl,
+      deliveryId,
+      code,
+      Number(armada.delivery_fee || 0)
+    )
+    .run();
+
+  return json({
+    ok: true,
+    deliveryId,
+    code,
+    trackingUrl
+  });
+}
+
+async function armadaRequest(env, method, path, payload) {
+  const body = JSON.stringify(payload);
+  const timestamp = Date.now().toString();
+
+  const signature = await hmacHex(
+    `${timestamp}.${method}.${path}.${body}`,
+    env.ARMADA_API_SECRET
+  );
+
+  const response = await fetch(
+    `https://api.armadadelivery.com${path}`,
+    {
+      method,
+      headers: {
+        Authorization: `Key ${env.ARMADA_API_KEY}`,
+        "x-armada-timestamp": timestamp,
+        "x-armada-signature": signature,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body
+    }
+  );
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    console.error("Armada error", response.status, result);
+    throw new HttpError(
+      result.message ||
+      result.error ||
+      "تعذر إنشاء طلب Armada.",
+      502
+    );
+  }
+
+  return result;
+}
+
+async function hmacHex(message, secret) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    {
+      name: "HMAC",
+      hash: "SHA-256"
+    },
+    false,
+    ["sign"]
+  );
+
+  const digest = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(message)
+  );
+
+  return [...new Uint8Array(digest)]
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
 async function updateDelivery(request, env, orderId) {
   const body = await readJson(request);
   const status = String(body.status || "NEW").toUpperCase();
