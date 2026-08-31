@@ -51,9 +51,52 @@ async function createPayment(request, env) {
   if (total <= 0) throw new HttpError("قيمة الطلب غير صالحة.", 400);
 
   const orderId = `AQ-${Date.now()}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
-  await env.DB.prepare(`INSERT INTO orders (id,status,customer_name,customer_phone,customer_email,customer_address,items_json,subtotal,delivery_fee,total) VALUES (?,?,?,?,?,?,?,?,?,?)`)
-    .bind(orderId, "PENDING", customer.name, customer.phone, customer.email, customer.address, JSON.stringify(items), subtotal, deliveryFee, total).run();
-
+await env.DB.prepare(`
+  INSERT INTO orders (
+    id,
+    status,
+    customer_name,
+    customer_phone,
+    customer_email,
+    customer_address,
+    customer_governorate,
+    customer_area,
+    customer_block,
+    customer_street,
+    customer_avenue,
+    customer_building,
+    customer_floor,
+    customer_apartment,
+    customer_notes,
+    items_json,
+    subtotal,
+    delivery_fee,
+    total
+  )
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+`)
+  .bind(
+    orderId,
+    "PENDING",
+    customer.name,
+    customer.phone,
+    customer.email,
+    customer.address,
+    customer.governorate,
+    customer.area,
+    customer.block,
+    customer.street,
+    customer.avenue,
+    customer.building,
+    customer.floor,
+    customer.apartment,
+    customer.notes,
+    JSON.stringify(items),
+    subtotal,
+    deliveryFee,
+    total
+  )
+  .run();
   const paymentPayload = {
     InvoiceValue: total,
     CustomerName: customer.name,
