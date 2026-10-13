@@ -46,7 +46,7 @@ async function createPayment(request, env) {
     return { id: item.id, quantity: item.quantity, unitPrice, name: String(product.nameAr || product.nameEn || `Product ${item.id}`).slice(0, 100) };
   });
   const subtotal = roundKwd(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0));
-  const deliveryFee = 0;
+  const deliveryFee = 2.500;
   const total = roundKwd(subtotal + deliveryFee);
   if (total <= 0) throw new HttpError("Ù‚ÙŠÙ…Ø© Ø§Ù„Ø·Ù„Ø¨ ØºÙŠØ± ØµØ§Ù„Ø­Ø©.", 400);
 
@@ -67,7 +67,18 @@ async function createPayment(request, env) {
     CustomerMobile: normalizeKuwaitMobile(customer.phone),
     CustomerEmail: customer.email || undefined,
     CustomerAddress: { AddressInstructions: customer.address },
-    InvoiceItems: items.map(item => ({ ItemName: item.name, Quantity: item.quantity, UnitPrice: item.unitPrice }))
+   InvoiceItems: [
+  ...items.map(item => ({
+    ItemName: item.name,
+    Quantity: item.quantity,
+    UnitPrice: item.unitPrice
+  })),
+  {
+    ItemName: "رسوم التوصيل",
+    Quantity: 1,
+    UnitPrice: deliveryFee
+  }
+]
   };
 
   const response = await myFatoorah(env, "/v2/SendPayment", paymentPayload);
