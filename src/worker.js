@@ -67,18 +67,7 @@ async function createPayment(request, env) {
     CustomerMobile: normalizeKuwaitMobile(customer.phone),
     CustomerEmail: customer.email || undefined,
     CustomerAddress: { AddressInstructions: customer.address },
-   InvoiceItems: [
-  ...items.map(item => ({
-    ItemName: item.name,
-    Quantity: item.quantity,
-    UnitPrice: item.unitPrice
-  })),
-  {
-    ItemName: "رسوم التوصيل",
-    Quantity: 1,
-    UnitPrice: deliveryFee
-  }
-]
+  InvoiceItems: items.map(item => ({ ItemName: item.name, Quantity: item.quantity, UnitPrice: item.unitPrice }))
   };
 
   const response = await myFatoorah(env, "/v2/SendPayment", paymentPayload);
