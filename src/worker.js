@@ -46,7 +46,7 @@ async function createPayment(request, env) {
     return { id: item.id, quantity: item.quantity, unitPrice, name: String(product.nameAr || product.nameEn || `Product ${item.id}`).slice(0, 100) };
   });
   const subtotal = roundKwd(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0));
-  const deliveryFee = 2.500;
+  const deliveryFee = 0;
   const total = roundKwd(subtotal + deliveryFee);
   if (total <= 0) throw new HttpError("Ù‚ÙŠÙ…Ø© Ø§Ù„Ø·Ù„Ø¨ ØºÙŠØ± ØµØ§Ù„Ø­Ø©.", 400);
 
